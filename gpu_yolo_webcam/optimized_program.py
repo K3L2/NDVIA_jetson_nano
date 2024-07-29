@@ -75,7 +75,9 @@ def update_frame():
             if frame_count % frame_skip == 0:
                 capture_image = frame.copy()
                 if model is not None:
-                    processed_image = capture_image.copy()
+                    # 이미지 크기 조절
+                    resized_frame = cv2.resize(capture_image, (640, 480))
+                    processed_image = resized_frame.copy()
                     preprocessed_image = apply_preprocessing(processed_image, preprocessing_method.get())
                     yolo_obj_draw(preprocessed_image, threshold=0.2)
                     image = cv2.cvtColor(preprocessed_image, cv2.COLOR_BGR2RGB)
@@ -174,7 +176,7 @@ Label(init_control_frame, text="사용할 웹캠을 선택한 후 start를 누�
 cam_combobox = ttk.Combobox(init_control_frame, values=available_cameras)
 cam_combobox.grid(row=1, column=0, padx=5, pady=5)
 
-start_button = Button(init_control_frame, text="Start", command=lambda: [init_control_frame.pack.forget(),
+start_button = Button(init_control_frame, text="Start", command=lambda: [init_control_frame.pack_forget(),
                                                                          control_frame.pack(side=tk.BOTTOM, fill=tk.X,
                                                                                             padx=10, pady=10),
                                                                          start_webcam()])
