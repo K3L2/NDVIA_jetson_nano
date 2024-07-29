@@ -8,7 +8,7 @@ from ultralytics import YOLO
 import torch
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-messagebox.showinfo("device info", f"{device} 로 작동중 입니다.")
+print(f"{device} 로 작동중 입니다.")
 
 # 전역 변수 초기화
 model = None
@@ -47,7 +47,8 @@ def apply_preprocessing(image, method):
         return image
 
 def yolo_obj_draw(img, threshold=0.3):
-    detection = model(img)[0]
+    results = model(img)
+    detection = results[0]
     boxinfos = detection.boxes.data.tolist()
 
     for data in boxinfos:
@@ -79,6 +80,8 @@ def update_frame():
             image_tk = ImageTk.PhotoImage(image)
             webcam_label.imgtk = image_tk
             webcam_label.configure(image=image_tk)
+        webcam_label.after(10, update_frame)
+    else:
         webcam_label.after(10, update_frame)
 
 def load_model():
