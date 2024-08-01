@@ -257,8 +257,25 @@ def key_event(event):
     elif event.keysym in ['minus']:  # minus
         print("Minus (-) pressed")
         finish_inspection()
-    if event.keysym == '5':
-        event.widget.invoke()
+    elif event.keysym == '2':  # 아래로 이동
+        if isinstance(event.widget, ttk.Combobox):
+            # 다음 항목으로 이동
+            current_index = event.widget.current()
+            if current_index < len(event.widget['values']) - 1:
+                event.widget.current(current_index + 1)
+    elif event.keysym == '8':  # 위로 이동
+        if isinstance(event.widget, ttk.Combobox):
+            # 이전 항목으로 이동
+            current_index = event.widget.current()
+            if current_index > 0:
+                event.widget.current(current_index - 1)
+    elif event.keysym == '5':
+        event.widget.invoke()  # Simulate button click
+    elif event.keysym == '7':
+        # 포커스를 다음 위젯으로 이동 (탭과 동일한 기능)
+        next_widget = event.widget.tk_focusNext()
+        if next_widget:
+            next_widget.focus_set()
 
 # 모델 파일 리스트 가져오기
 model_files = ["normal"] + [f for f in os.listdir(model_dir) if os.path.isfile(os.path.join(model_dir, f))]
@@ -269,10 +286,15 @@ product_codes = ["PCBA", "PCBB", "PCBC", "PCBD", "PCBE"]
 # GUI 생성
 root = tk.Tk()
 root.title("YOLO Webcam GUI")
+
+# 전역 키 이벤트 바인딩
 root.bind('<asterisk>', key_event)  # Bind asterisk for Enter functionality
 root.bind('<plus>', key_event)  # Bind plus for KP_Add
 root.bind('<minus>', key_event)  # Bind minus for KP_Subtract
-root.bind('<KeyPress-5>', key_event)
+root.bind('<KeyPress-5>', key_event)  # Bind number 5
+root.bind('<KeyPress-2>', key_event)  # Bind number 2
+root.bind('<KeyPress-8>', key_event)  # Bind number 8
+root.bind('<KeyPress-7>', key_event)  # Bind number 7
 
 webcam_label = Label(root)
 webcam_label.pack(side=tk.LEFT)
@@ -284,7 +306,7 @@ init_control_frame = tk.Frame(root)
 init_control_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
 
 Label(init_control_frame, text="사용할 웹캠을 선택한 후 start를 누르세요").grid(row=0, column=0, padx=5, pady=5)
-cam_combobox = ttk.Combobox(init_control_frame, values=available_cameras)
+cam_combobox = ttk.Combobox(init_control_frame, values=available_cameras, state='readonly')
 cam_combobox.grid(row=1, column=0, padx=5, pady=5)
 
 start_button = Button(init_control_frame, text="Start", command=lambda: [init_control_frame.pack_forget(),
@@ -297,7 +319,8 @@ start_button.grid(row=2, column=0, padx=5, pady=5)
 
 control_frame = tk.Frame(root)
 
-model_combobox = ttk.Combobox(control_frame, values=model_files)
+# 상태를 'readonly'로 설정하여 콤보박스의 직접적인 텍스트 입력을 막음
+model_combobox = ttk.Combobox(control_frame, values=model_files, state='readonly')
 model_combobox.grid(row=0, column=0, padx=5, pady=5)
 
 load_button = Button(control_frame, text="Load Model", command=load_model)
@@ -306,12 +329,12 @@ load_button.grid(row=1, column=0, padx=5, pady=5)
 
 # 전처리 방법 선택
 Label(control_frame, text="전처리 방법을 선택하세요").grid(row=2, column=0, padx=5, pady=5)
-preprocessing_method = ttk.Combobox(control_frame, values=['normal', 'hsv', 'retinex'])
+preprocessing_method = ttk.Combobox(control_frame, values=['normal', 'hsv', 'retinex'], state='readonly')
 preprocessing_method.grid(row=3, column=0, padx=5, pady=5)
 preprocessing_method.current(0)
 
 Label(control_frame, text="Product Code를 선택하세요").grid(row=4, column=0, padx=5, pady=5)
-product_code_combobox = ttk.Combobox(control_frame, values=product_codes)
+product_code_combobox = ttk.Combobox(control_frame, values=product_codes, state='readonly')
 product_code_combobox.grid(row=5, column=0, padx=5, pady=5)
 
 Label(control_frame, text="Product ID").grid(row=6, column=0, padx=5, pady=5)
